@@ -1,0 +1,6 @@
+Changelog: (jj/mm/yy)
+13/7/19 : Rewrote the script completely to adapt to the new way AO3 manages its downloads. Also added support for every format AO3 can use.
+06/7/18 : Added support for html exports
+05/7/18 : bypassed what presumably is a bug in TextBufferedRandom IO file openers, that made io_insert corruptive
+05/7/18 : added basic style parser, to fix the 'multiple identiquel IDs' bug, which might crash some reading devices/software
+03/7/18 : initial release. (support for epub only)
