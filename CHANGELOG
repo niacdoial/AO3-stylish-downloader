@@ -1,4 +1,5 @@
 Changelog: (jj/mm/yy)
+14/7/19 : added windows support, interactive command line version and published on git
 13/7/19 : Rewrote the script completely to adapt to the new way AO3 manages its downloads. Also added support for every format AO3 can use.
 06/7/18 : Added support for html exports
 05/7/18 : bypassed what presumably is a bug in TextBufferedRandom IO file openers, that made io_insert corruptive
