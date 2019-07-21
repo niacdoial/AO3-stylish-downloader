@@ -80,6 +80,16 @@ def generate_namespace():
         else:
             ns.format = raw_format
 
+    if ns.format != 'html':
+        print('Do you want to embed images that could be contained in the fic? (otherwise, seeing them will recquire an internet connection)')
+        ans = input('y/n/EXIT > ')
+        if ans.lower() in ('y', 'yes', 'confirm', 'proceed'):
+            ns.embed = True
+        elif ans == 'EXIT':
+            raise KeyboardInterrupt()
+        else:
+            ns.embed=False
+
     return ns
 
 

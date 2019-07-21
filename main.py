@@ -7,11 +7,11 @@ import libficconvert as lfc
 def outputpath_arg(string):
     """output path. format: (`DIR or FILE`, directory, file (if provided), overwrite warning(bool) )"""
     if os.path.isdir(string):
-        return ("DIR" , os.path.abspath(string), '', False)
+        return ["DIR" , os.path.abspath(string), '', False]
     elif os.path.isdir(os.path.split(string)[0]):
         path, file = os.path.split(os.path.abspath(string))
         ovrw_warning = os.path.isfile(string)
-        return ("FILE", path, file, ovrw_warning)
+        return ["FILE", path, file, ovrw_warning]
     else:
         raise argparse.ArgumentTypeError("invalid output path. must be a existing dir or a proper file")
 
@@ -44,7 +44,7 @@ def parse():
         args.output[3] = os.path.isfile( os.path.join( args.output[1], args.output[2] ) )
 
     if (not args.overwrite) and args.output[3]:
-        print("Error: file \"" + os.path.join(*args.output[1:3]) + "\" already exists and overwriting is disabled. Use -W to enable.", file=sys.stderr)
+        print("Error: file \"" + os.path.join(args.output[1], args.output[2]) + "\" already exists and overwriting is disabled. Use -W to enable.", file=sys.stderr)
         exit(1)
 
     print(args)
@@ -83,6 +83,7 @@ def main(args):
     style = lfc.style_parser(style)
 
     if not args.output[2]:  # if no filename was provided
+        page.seek(0)
         temp_title, temp_author = lfc.getmetafrompage(page)
         args.output[2] = '{}-{}_by_{}.{}'.format(args.input[7:], temp_title, temp_author, args.format)
 
@@ -106,6 +107,9 @@ def main(args):
         mainfile.close()
     else:
         lfc.add_chapter_boundaries(mainfile)
+        if args.embed:
+            mainfile.seek(0)
+            lfc.parse_images(mainfile, tempdir)
         mainfile.close()
         lfc.localconvert(mainfile_path, os.path.join(args.output[1], args.output[2]), style)
 

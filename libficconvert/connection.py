@@ -67,3 +67,38 @@ def getwebpage(address, switches='', base_site='archiveofourown.org'):
         #print(page.read())
 
     return address, page
+
+
+def download_to_file(url, filename):
+    if url.split('.')[-1] in ('jpg', 'jpeg', 'png', 'bmp', 'gif', 'webm', 'tga', 'dds'):
+        filename += '.' + url.split('.')[-1]
+    else:
+        raise ValueError('download_to_file expected an image file')
+
+    parser = re.compile(r'(((?P<proto>[\w]+)://)?(?P<host>[\w\.\-]+))?(?P<addr>[/\w\%\-\.]*)')
+    res = parser.fullmatch(url)
+
+    base_site = res.group('host')
+    if base_site is None:
+        base_site='archiveofourown.org'
+
+    if res.group('proto') in (None, 'https'):
+        conn = http.client.HTTPSConnection(base_site, context=SSLC)
+    elif res.group('proto') == 'http':
+        conn = http.client.HTTPConnection(base_site)
+    else:
+        raise ValueError('download_to_file: expected a https or http connection')
+
+    conn.connect()
+    conn.request('GET', res.group('addr'))
+    page = conn.getresponse()
+    dumper = open(filename, 'wb')
+
+    buff = page.read(2048)
+    while buff:
+        dumper.write(buff)
+        buff = page.read(2048)
+
+    dumper.close()
+    page.close()
+    return filename

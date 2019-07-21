@@ -3,6 +3,7 @@ import re
 from sys import argv, stderr
 from subprocess import run
 import os
+from .connection import download_to_file
 
 # ## utilities
 
@@ -14,6 +15,7 @@ def io_insert(file, text, buffsize=2048):
 
     # begin actual 'insertion', by copy-pasting buffers at the right place
     cur = file.tell()
+    orig_pos = cur
     buff1 = file.read(buffsize)
     file.seek(cur)
     file.write(text)
@@ -35,6 +37,46 @@ def io_insert(file, text, buffsize=2048):
     # now, there is only less than one buffer size left.
     file.seek(cur + len(text))
     file.write(buff1)
+
+    file.seek(orig_pos + len(text))
+
+def io_erase(file, size, buffsize=2048):
+    """a utility to write into a BufferedRandomIO file interface, without overwriting some contents"""
+    if size>=buffsize:
+        buffsize = size
+    elif size == 0:
+        return
+    elif size < 0:
+        raise ValueError('io_erase: cannot erase a negative amount of bytes')
+    fsize = os.fstat(file.fileno()).st_size
+
+    # begin actual 'deletion', by copy-pasting the contents just afterwards
+    orig_pos = cur = file.tell()
+
+    while cur < fsize-buffsize:
+        # at this point, all text before cur has been fixed
+        # first, look up the contents that should be here
+        file.seek(cur+size)
+        buff1 = file.read(buffsize)
+        # then, paste on the right spot
+        file.seek(cur)
+        file.write(buff1)
+        # and adjust `cur` for next step
+        cur = file.tell()
+
+    # now, there is only less than one buffer size left.
+    # but is it before or after the new end of file?
+    if cur < fsize-size:
+        file.seek(cur+size)
+        buff1 = file.read(buffsize)
+        file.seek(cur)
+        file.write(buff1)
+    else:
+        file.seek(fsize-size)
+
+    # and adjust the file size
+    file.truncate()
+    file.seek(orig_pos)
 
 
 # ## read-only parsers (state-machine optimized)
@@ -320,3 +362,62 @@ def add_style_to_final_html(file, actualstyle=''):
     add_style_to_head(file, styleheader)
     while adapt_chapter(file):
         pass
+
+
+def parse_images(file, tempdir):
+    """finds the image tags in a html file and changes them into local images"""
+# <img src="https://66.media.tumblr.com/d8aabb041f3082e89fe4f3cc2b535889/tumblr_ptmhg0FVwz1wfpfh6_1280.jpg" alt="" width="286" height="293" data-pagespeed-url-hash="1369688483" onload="pagespeed.CriticalImages.checkImageForCriticality(this);"/>
+    parser = re.compile(b'(?P<all>(?P<pre>.*?)\\<img(?P<first>( *[\\w]+=".*?")*) src="(?P<url>.*?)"(?P<rest>( *[\\w]+=".*?")*) */ *\\>).*\\n?')
+    basename = os.path.split(file.name)[1] + '_image{:04d}'
+
+    line = b' '
+    counter = 0
+    pos = 0
+    while line:
+        # if the current line contains image tags, get ready to overwrite them.,
+        line_dirty = False  # if the file cursor scrolled back to be beginning of the line
+        if b'<img' in line:
+            file.seek(pos)
+            line_dirty = True
+
+        while b'<img' in line:
+            # beginning of while: file cursor is just before the contents contained in `line`
+
+            # first, get file and write to temp directory, and create new image tag
+            res = parser.fullmatch(line)
+            newname = os.path.split(
+                download_to_file(res.group('url').decode(), os.path.join(tempdir, basename.format(counter)))
+            )[1]
+            newstring = '{:s}<img{:s} src="./{:s}"{:s} />'.format(
+              res.group('pre').decode(),
+              res.group('first').decode(),
+              newname,
+              res.group('rest').decode()
+            ).encode()
+
+            # then write changes to file.
+
+            delta_l = len(res.group('all')) - len(newstring)
+            if delta_l < 0:  # need to insert
+                file.write(
+                    newstring[ :len(res.group('all'))  ]
+                )
+                io_insert(file,
+                    newstring[  len(res.group('all')): ]
+                )
+            else:  # need to erase ?
+                file.write(newstring)
+                io_erase(file, delta_l)
+
+            # loop maintenance:
+            counter +=1
+            line = line[len(res.group('all')):]  # remove the processed image from
+
+        # end while: somehting might still be on the line, but no more images.
+        # or me might already be on the next line
+        if line_dirty:
+            _ = file.readline()
+
+        pos = file.tell()
+        line = file.readline()
+    # end of "while line"
