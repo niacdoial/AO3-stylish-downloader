@@ -30,25 +30,25 @@ From there you have several options to launch the program.
   To be implemented
 
 
-  #### How to install and use (linux)
-  - Make sure you have installed python (version 3, ideally 3.5 or more)
-    To do so, just see if the command `python3` starts the python environnement, when you type it in the command line (to get out of it, enter Ctrl-D.)
-    If you don't have python, grab it from you package manager (usually under the name 'python3')
+#### How to install and use (linux)
+- Make sure you have installed python (version 3, ideally 3.5 or more)
+  To do so, just see if the command `python3` starts the python environnement, when you type it in the command line (to get out of it, enter Ctrl-D.)
+  If you don't have python, grab it from you package manager (usually under the name 'python3')
 
-  - also make sure ou have calibre (calibre-ebook.com), which is also probably in your package manager.
-  - make sure `main.py` and `interact.py` are executable (use the 'properties' dialog of your file explorer if you don't know how to do this)
+- also make sure ou have calibre (calibre-ebook.com), which is also probably in your package manager.
+- make sure `main.py` and `interact.py` are executable (use the 'properties' dialog of your file explorer if you don't know how to do this)
 
 
-  From there you have several options to launch the program.
+From there you have several options to launch the program.
 
-  - **command line**:
-    Open a console in the folder where `main.py` is located, and type `./main.py -h` to get a help text. Then, do that again, but replace `-h` by the arguments you want (example: `archiveofourown.org/works/12345678  .\output.epub`).
+- **command line**:
+  Open a console in the folder where `main.py` is located, and type `./main.py -h` to get a help text. Then, do that again, but replace `-h` by the arguments you want (example: `archiveofourown.org/works/12345678  .\output.epub`).
 
-  - **fully interactive command line**
-    Open a console where `main.py` is located, and launch `./interact.py`. You will be guided through the entire process. Depending on the file explorer, you should also be able to simply double click on `./interact.py`.
+- **fully interactive command line**
+  Open a console where `main.py` is located, and launch `./interact.py`. You will be guided through the entire process. Depending on the file explorer, you should also be able to simply double click on `./interact.py`.
 
-  - **Graphical interface**
-    To be implemented
+- **Graphical interface**
+  To be implemented
 
 ---
 
