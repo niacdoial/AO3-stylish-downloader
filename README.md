@@ -1,3 +1,16 @@
+# deprecation notice:
+This whole project is more or less superceded by not-so recent changes added to the [FanFicFare](https://github.com/JimmXinu/FanFicFare) plugin for [calibre](https://calibre-ebook.com/),
+which is well more maintained than this anyway
+
+Make sure that you add the following to your FanFicFare configuration in order for it to download workskins along with fics:
+```ini
+[archiveofourown.org]
+use_workskin:true
+```
+
+
+---
+
 ## 'archive restyler' by niacdoial
 This python script's purpose is to download a fic from AO3 (fic URL and destination have to be provided), but unlike the vanilla on-site downloader, it keeps the author's style.
 
